@@ -1,0 +1,10 @@
+{
+  "member_id": "your.username",
+  "endpoint_base": "https://your-compound-daily-host",
+  "endpoint_paths": {
+    "daily_report": "/api/v1/ingest/daily-reports",
+    "session_card": "/api/v1/ingest/session-cards"
+  },
+  "outbox_dir": "~/.local/state/compound-daily/outbox",
+  "projects_root": "~/.claude/projects"
+}

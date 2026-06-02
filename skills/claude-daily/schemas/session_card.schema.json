@@ -1,0 +1,17 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["member_id", "session_id", "started_at", "submitted_at", "content", "summary", "value_tag"],
+  "additionalProperties": false,
+  "properties": {
+    "member_id":    {"type": "string", "pattern": "^[a-z][a-z0-9._-]{2,40}$"},
+    "session_id":   {"type": "string", "minLength": 8},
+    "started_at":   {"type": "string", "minLength": 20},
+    "submitted_at": {"type": "string", "minLength": 26},
+    "content":      {"type": "string", "minLength": 1},
+    "summary":      {"type": "string", "maxLength": 200},
+    "value_tag":    {"type": "string", "enum": ["valuable", "chitchat", "loop", "no_output"]},
+    "duration":     {"type": "integer", "minimum": 0},
+    "token":        {"type": "integer", "minimum": 0}
+  }
+}

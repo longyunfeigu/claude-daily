@@ -1,0 +1,4 @@
+{"type":"user","timestamp":"2026-05-10T01:42:11.000Z","sessionId":"f66e2252-9cef-4d50-b8f2-000000000001","cwd":"/tmp/project","message":{"content":"帮我搞清 CrewAI 的结构化输出"}}
+{"type":"assistant","timestamp":"2026-05-10T01:42:30.000Z","sessionId":"f66e2252-9cef-4d50-b8f2-000000000001","message":{"content":"开始调研","usage":{"input_tokens":1000,"output_tokens":500,"cache_read_input_tokens":200,"cache_creation_input_tokens":100}}}
+{"type":"user","timestamp":"2026-05-10T01:55:00.000Z","sessionId":"f66e2252-9cef-4d50-b8f2-000000000001","cwd":"/tmp/project","message":{"content":"再确认 response_model 的副作用"}}
+{"type":"assistant","timestamp":"2026-05-10T01:55:45.000Z","sessionId":"f66e2252-9cef-4d50-b8f2-000000000001","message":{"content":"已确认","usage":{"input_tokens":2000,"output_tokens":1500,"cache_read_input_tokens":300,"cache_creation_input_tokens":200}}}

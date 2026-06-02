@@ -1,0 +1,20 @@
+{
+  "name": "claude-daily",
+  "owner": {
+    "name": "longyunfeigu",
+    "email": "longyunfeigu@outlook.com"
+  },
+  "metadata": {
+    "description": "把本地 Claude Code 会话整理成可追溯的每日工作报告",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "claude-daily",
+      "description": "把本地 Claude Code 会话记录整理成 Session Card + Daily Report，并按 PRD 上报到 Compound Daily ingestion 服务",
+      "source": "./",
+      "strict": false,
+      "skills": ["./skills/claude-daily"]
+    }
+  ]
+}
