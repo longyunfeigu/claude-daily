@@ -129,7 +129,7 @@ def assistant_segment_signals(text, previous_event_type=None):
     return signals
 
 
-def extract_assistant_segments(text, timestamp=None, start_idx=0, previous_event_type=None, limit=24):
+def extract_assistant_segments(text, timestamp=None, start_idx=0, previous_event_type=None, limit=40):
     segments = []
     seen = set()
     for block in split_text_blocks(text):
@@ -309,20 +309,29 @@ def parse_session_file(path, token_date=None, timezone_offset=None):
             if row.get("type") == "user":
                 text = text_from_content(content)
                 if text and not is_noise_text(text):
-                    user_prompts.append(compact(text, 500))
+                    user_prompts.append(compact(text, 1500))
                     compact_events.append(
                         {
                             "type": "user_prompt",
                             "time": timestamp,
-                            "text": compact(text, 280),
+                            "text": compact(text, 500),
                         }
                     )
 
             if row.get("type") == "assistant":
                 text = text_from_content(content)
                 if text and not is_noise_text(text):
-                    assistant_samples.append(compact(text, 500))
                     previous_event_type = compact_events[-1]["type"] if compact_events else None
+                    assistant_samples.append(compact(text, 800))
+                    # Interleave assistant voice into the chronological timeline so the
+                    # 用户问→AI 答→工具 arc is reconstructable for 主要过程 / 人机协作.
+                    compact_events.append(
+                        {
+                            "type": "assistant",
+                            "time": timestamp,
+                            "text": compact(text, 360),
+                        }
+                    )
                     assistant_segments.extend(
                         extract_assistant_segments(
                             text,
@@ -364,9 +373,9 @@ def parse_session_file(path, token_date=None, timezone_offset=None):
         "user_prompts": user_prompts,
         "first_prompt": user_prompts[0] if user_prompts else None,
         "last_prompt": user_prompts[-1] if user_prompts else None,
-        "assistant_samples": assistant_samples[-3:],
-        "assistant_segments": assistant_segments[:80],
-        "compact_events": compact_events[:160],
+        "assistant_samples": assistant_samples[-8:],
+        "assistant_segments": assistant_segments[:160],
+        "compact_events": compact_events[:400],
         "tools": dict(evidence["tools"]),
         "files_read": sorted(evidence["files_read"]),
         "files_modified": sorted(evidence["files_modified"]),
@@ -551,14 +560,15 @@ def build_context(projects_root, date=None, session_prefixes=None, include_subag
         "totals": totals,
         "sessions": parsed,
         "session_card_schema": [
-            "主题",
-            "目标",
+            "原本想做什么",
             "主要过程",
             "产出",
             "关键决策",
-            "文件/命令证据",
-            "未完成事项",
-            "可沉淀经验",
+            "差距",
+            "走过的弯路",
+            "证据",
+            "人机协作",
+            "沉淀",
         ],
         "instructions_for_llm": {
             "rule": "Use facts and evidence from this JSON only. If evidence is missing, say 未发现明确证据.",

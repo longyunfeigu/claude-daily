@@ -35,8 +35,9 @@ Fail the review if any item below is violated.
 - Personal report keeps all 9 required Daily Report sections.
 - Manager report omits `今天学到的`, `被推翻的想法`, `走过的弯路`, and usually
   `Session 附录`, unless a removed section directly affects schedule or risk.
-- Every Session Card in `_output.personal.md` contains the 8 required fields in
-  order.
+- Every Session Card in `_output.personal.md` contains the 9 required fields in
+  order (原本想做什么/主要过程/产出/关键决策/差距/走过的弯路/证据/人机协作/沉淀).
+- `主要过程` 按回合/阶段叙事并覆盖到主要回合；不应被压成三五条干 bullet（10+ 回合的 session 尤其）。
 - `_session_meta.json` has one entry per top-level session and each `summary`
   is at most 80 Unicode characters.
 
@@ -61,6 +62,15 @@ Fail the review if any item below is violated.
 - `走过的弯路` points to revert/reset/abandoned-path/user-reversal evidence;
   otherwise the report uses the empty phrase.
 - `验证结果` names missing verification explicitly with `未发现明确验证证据`.
+
+### 人机协作（仅 personal）
+
+- personal 卡片每张都有 `人机协作`，含四子项：协作方式 / 怎么提问 / 怎么驾驭 / 哪些做得好；manager 卡片不应出现该字段。
+- 正文无学术黑话（acceleration / delegation / Dependency Ratio / interactive steering 等）。
+- 每条子项**直接引用 `user_prompts` 里的真实原话**（带引号 verbatim 片段），不是泛泛转述；无证据子项用空句式而非编造。
+- 引文必须能在 `_context.json` 的 `user_prompts` 里逐字找到；把 CLAUDE.md 规则、AI 自己的话或推测当成用户原话的，判为不合格（张冠李戴）。
+- `哪些做得好` 每条都绑**具体动作（含触发原话）+ 带来的效果**，空夸（如"提问很清晰"而无具体动作/原话）判为不合格。
+- 标尺真落地：`怎么提问` 要落到具体手法或缺陷类目（如"写死约束""漏验收标准导致返工"），不是泛泛"给了约束"；`怎么驾驭` 要给出依赖姿态判断（过度/不足/校准）+ 至少一处纠错恢复或选择性的具体观察。但**标尺名词不得出现在正文**（出现 Prompt Pattern/Dependency Ratio 等即不合格）。
 
 ### Audience Fit
 

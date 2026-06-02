@@ -150,12 +150,17 @@ Every Session Card must include these fields in this order:
 差距
 走过的弯路
 证据
+人机协作
+  - 协作方式
+  - 怎么提问
+  - 怎么驾驭
+  - 哪些做得好 / 可复用
 沉淀
   - 下次怎么做
   - 被推翻的想法
 ```
 
-These eight fields cover three different cognitive functions on purpose:
+These fields cover several different cognitive functions on purpose:
 
 - **过程** narrates how thinking moved (调研路径、grep 序列、推理拐点)
 - **产出** lists what artifacts were created (改了什么文件、给了什么结论)
@@ -166,12 +171,18 @@ Do not collapse them into a single narrative; each carries information the other
 Field-level constraints:
 
 - **原本想做什么**: anchor to `user_prompts`; describe the start-of-session goal, not the eventual outcome. Quote a short fragment when it sharpens meaning.
-- **主要过程**: bullet or short-paragraph form. Each step ties to tool calls, files read, commands, or web searches. Show the trail, not just the destination.
+- **主要过程**: bullet form, narrate the session **逐回合/逐阶段**——not three or four dry bullets. Each bullet = 用户这一轮问/要什么 + AI 怎么回应或提了什么方案 + 这一轮落了什么（工具、读改了哪些文件、命令、web 搜索）。Reconstruct the arc from the interleaved `compact_events` timeline (now ordered 用户→AI→工具). 宁可多列几条覆盖真实回合，也不要压缩成几条。Show the trail, not just the destination.
 - **产出**: enumerate concrete deliverables—modified files (with paths), generated tables/snippets, conclusions stated in the conversation. If nothing was produced, write `无产出工件`.
 - **关键决策**: each entry framed as "在 X 和 Y 之间为何选 X"; bind to evidence (file, command, web source, benchmark). A choice without a visible alternative is an action, not a decision—belongs to 主要过程.
 - **差距**: state intent-vs-reality deviation plainly; if matched, write `无显著偏离`. Do not invent gaps. Unfinished work is a gap (timing or scope reason).
 - **走过的弯路**: identify abandoned paths, reverted edits, killed branches, mid-flight reversals; if none, write `今天没走值得记的弯路`.
 - **证据**: tool counts (e.g. `Bash×35, Read×23, Edit×16, WebSearch×5`), important files, key commands; if no edits, write `无本地文件修改证据`.
+- **人机协作**: 仅 self/personal 卡片显示，manager 卡片省略。四条子项，全部大白话、绑 transcript 证据，**禁止学术黑话**（不写 acceleration/delegation/Dependency Ratio，用"加速/探索""替我写/陪我写"或直接描述行为）。每条要多个具体实例，且**必须直接引用 `user_prompts` 里的真实原话**（带引号 verbatim、可截断不可改写），让读者看到用户真实怎么说，而非转述；只能引用真实出现过的用户句子，不得把 CLAUDE.md 规则或 AI 自己的话当成用户原话：
+  - **协作方式**：偏"你定方向、AI 执行"还是"整包委派给 agent"；加速（知道要啥让 AI 更快）还是探索（不确定用 AI 摸选项）。依据 `user_prompts` 语气（指令式 vs 提问式）+ 委派粒度。
+  - **怎么提问**：按 report-prompts.md 的两把标尺判断——「提问手法清单」(给上下文/写死约束反例/限定产出形态/先要方案再拍板/要求验证/赋角色) + 「提问缺陷类目」(漏目标/约束/上下文/示例/验收标准)；识别用了哪几手、哪轮漏了哪类导致返工，**名词不进正文**，引原话佐证。
+  - **怎么驾驭**：按 report-prompts.md 的三组信号判断——「依赖姿态」(过度依赖/依赖不足/校准得当) +「纠错恢复」(错误多快被抓到、止损) +「选择性」(整块照收 vs 挑着用)；**名词不进正文**，配纠正/否决/砍范围/拦截动作的原话 + 回退命令 + 几轮收敛。
+  - **哪些做得好 / 可复用**：按评判标尺点出**最强的人类动作 + 为什么有用**（绑具体动作，不空夸），可附【可更好】。标尺：给约束/边界、决策前先要 AI 给方案再拍板、及时纠错、主动砍范围防过度设计、要求验证不轻信、选择性采纳——这些是"人比 AI 更该主导"的部分。
+  - 子项证据不足时写空句式（如 `这次基本一遍过，没怎么纠偏`、`这次协作方式不明显`），不编。详细写法见 `references/report-prompts.md`。
 - **沉淀**: split `下次怎么做`（action to repeat/change）and `被推翻的想法`（assumption overturned）; if neither applies, write `今天没什么值得记的`.
 
 If any field lacks evidence, use the explicit "no evidence" phrase from `references/report-prompts.md` instead of inventing content.

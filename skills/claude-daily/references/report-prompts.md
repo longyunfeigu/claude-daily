@@ -42,6 +42,12 @@ Write one card per top-level session, in chronological order:
 
 证据：
 
+人机协作：（仅 personal 卡片；manager 卡片省略本字段）
+- 协作方式：
+- 怎么提问：
+- 怎么驾驭：
+- 哪些做得好 / 可复用：
+
 沉淀：
 - 下次怎么做：
 - 被推翻的想法：
@@ -55,10 +61,11 @@ Write one card per top-level session, in chronological order:
 - If the session shifted intent mid-way, note both the original and shifted goal.
 
 **主要过程**
-- Bullet form. Narrate how the thinking moved across the session: 调研路径, grep sequences, recognition turning points, multi-round dialogues.
-- Each bullet ties to concrete signals: tool calls, files read, commands, web searches, or named user pushbacks.
-- This field shows the trail, not the destination. Do not skip to results here.
-- Example bullet shape: "用户从 X 出发，追问 Y 的本质差异，并要求联网验证 Z 是不是幻觉"; "Claude 沿着 a.py、b.py 一路 grep，定位 X、Y、Z 字段的实际行为".
+- Bullet form, narrate the session **逐回合/逐阶段**——把对话弧线一段段写出来，不要压成三五条干 bullet。每个实质回合/阶段一条。
+- Reconstruct the arc from the interleaved `compact_events` timeline, which now carries `user_prompt → assistant → tool` 顺序事件；用它还原"用户问什么 → AI 怎么回/提了什么 → 这一轮落了什么"。
+- Each bullet = 用户这一轮的诉求 + AI 的回应或方案 + 该回合的落地（tool calls, files read/modified, commands, web searches）+ 命名的用户 pushback（如有）。
+- 详细度下限：覆盖到当天的主要回合；一个有 10+ 回合的 session 不应只剩 4 条过程。This field shows the trail, not the destination. Do not skip to results here.
+- Example bullet shape: "用户抛出 X vs Y 两个候选 → Claude 先读 a.py/b.py 摸清现状、指出 Y 是伪命题并给推荐 → 用户认可并定下方向 Z"; "Claude 沿着 a.py、b.py 一路 grep，定位 X、Y、Z 字段的实际行为，用户随后要求联网验证是不是幻觉".
 
 **产出**
 - Enumerate concrete artifacts created in the session:
@@ -91,6 +98,43 @@ Write one card per top-level session, in chronological order:
 - Important modified files first; truncate noisy paths.
 - Commands only when they explain the work.
 - If there are no file edits, write `无本地文件修改证据`.
+
+**人机协作**
+
+仅在 self/personal 卡片写本字段；manager 卡片省略（业务读者会把"我怎么驾驭 AI"读成自我评价）。
+
+<!-- 下面四条子项的判断标尺来自人机协作研究，仅作 LLM 内部分析脚手架，名词不进正文：
+     加速/探索双模 (Grounded Copilot, arxiv 2206.15000)；code-with/code-for (arxiv 2507.08149)；
+     提问手法 (Prompt Pattern Catalog, arxiv 2302.11382)；提问缺陷类目 (arxiv 2504.20196)；
+     依赖姿态 over/under-reliance + 纠错恢复 (arxiv 2603.18895)；选择性采纳 (arxiv 2506.10051)。 -->
+
+
+通用规则：
+- **全程大白话，禁止学术黑话**——不要出现 acceleration mode / delegation / Dependency Ratio / interactive steering 这类词。用"加速/探索""替我写/陪我写"这类中文，或直接描述行为。这些框架只是 schema 的脚手架，不是正文词汇。
+- **每条实例必须直接引用 `user_prompts` 里的真实原话**（带引号的 verbatim 片段，可截断但不得改写措辞），让读者看到用户当时到底怎么说的，而不是转述。
+  - ✅ `约束前置——「fastapi-base里的内容不做改动」「这两个我不需要了，你写在README.md 中吧」`
+  - ❌ `你要求别动 fastapi-base、把功能写进 README`（转述，无原话）
+  - **只能引用 `user_prompts` 里真实出现的句子**；不要把 CLAUDE.md 规则、AI 自己的话、或推测当成用户原话（强制引用正是为了挡住这种张冠李戴）。
+- 每条子项给多个这样的带原话实例，不是一句概括。
+- 全部绑 transcript 证据；子项无证据时写空句式（见 Hallucination Guard），不编。
+
+四条子项：
+
+- **协作方式**：这次偏"你定方向、AI 执行 + 紧驾驭"，还是"整包委派给 agent 自己跑"？以加速（知道要干嘛、让 AI 更快到达）为主还是探索（不确定、用 AI 列选项摸路）为主，或两者在不同阶段交替。依据：`user_prompts` 语气（指令式 vs 提问式）+ 委派粒度（大段交给 agent vs 多次小步引导）+ `compact_events` 的回合密度。
+
+- **怎么提问**：用下面两把标尺分析（**标尺只用于判断，这些名词不许进正文；正文翻成大白话 + 引用户原话佐证**）：
+  - 提问手法（识别用户用了哪几手 → 引原话）：①给上下文/指明范围 ②写死约束与反例（"不要…""只要…不要…"）③限定产出形态（要表格/要 diff/要先出方案）④先要 AI 给方案或讲权衡再拍板，而非直接下令 ⑤要求验证/核查、不轻信 ⑥赋角色或给标准。
+  - 提问缺陷（识别哪轮漏了什么 → 导致什么）：漏目标 / 漏约束边界 / 漏上下文（哪个文件、在哪） / 漏示例或期望输出 / 漏验收标准。指出因哪类缺失导致 AI 跑偏、返工或被追加澄清（依据 `compact_events` 里需求漂移、AI 先做后被否的回合）。
+
+- **怎么驾驭**：用下面三组信号判断（**输出大白话，不写信号名**）：
+  - 依赖姿态：盲接受/不验证就用（过度依赖）↔ 该交给 AI 的硬自己扛、不放手（依赖不足）↔ 校准得当（该放手放手、该验证验证）。
+  - 纠错恢复：AI 出错或越界时，**多快被抓到、怎么纠、有没有防止扩散**——抓得早、止损快是强信号。
+  - 选择性：整块照单全收 ↔ 细粒度挑着用、只采纳对的部分。
+  具体动作：纠正/否决/砍范围/拦截风险动作；引原话佐证（不对/重来/换一种/算了/不要/回滚等）+ 回退命令（git restore/reset）+ 几轮收敛。
+
+- **哪些做得好 / 可复用**：按下方标尺，点出本 session 里**最强的几个人类动作 + 为什么有用**（必须绑具体动作和它带来的效果，如"避免了一轮返工""及时拦住了越界"，**不许空夸**如"提问很清晰"）。可附 1 条【可更好】指出哪一步本可做得更好。
+  评判标尺（"人比 AI 更该主导"的动作）：① 给明确约束/边界/示例 → 减少返工；② 决策前先让 AI 调研/给方案再拍板 → 不盲接受；③ 及时发现并纠正 AI 错误/越界 → 错误恢复快；④ 主动砍范围、否决过度设计 → 防止 AI 跑偏膨胀；⑤ 要求验证、不轻信 AI 自述；⑥ 选择性采纳而非整块照单全收。
+  每条形如 `【好】<具体动作>——<为什么有用/带来的效果>`。
 
 **沉淀**
 - `下次怎么做`：a concrete action to repeat or change next time the same task appears.
@@ -217,6 +261,9 @@ Use these phrases when evidence is absent:
 - `无产出工件`
 - `无关键决策`
 - `无显著偏离`
+- `这次基本一遍过，没怎么纠偏`
+- `这次协作方式不明显`
+- `这次提问没有明显模式`
 
 Do **not**:
 

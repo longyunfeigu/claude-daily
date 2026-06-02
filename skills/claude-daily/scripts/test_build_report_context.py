@@ -176,6 +176,32 @@ class BuildReportContextTest(unittest.TestCase):
             self.assertIn("contains_keyword", parsed["assistant_segments"][0]["signals"])
             self.assertNotIn("contains_keyword", parsed["assistant_segments"][1]["signals"])
 
+    def test_compact_events_interleave_assistant_voice(self):
+        with tempfile.TemporaryDirectory() as td:
+            session = Path(td) / "projects" / "-tmp-project" / "arc12345.jsonl"
+            write_jsonl(
+                session,
+                [
+                    {"type": "user", "timestamp": "2026-05-06T01:00:00.000Z",
+                     "cwd": "/tmp/project", "sessionId": "arc12345",
+                     "message": {"content": "把 X 改成 Y"}},
+                    {"type": "assistant", "timestamp": "2026-05-06T01:00:10.000Z",
+                     "cwd": "/tmp/project", "sessionId": "arc12345",
+                     "message": {"content": [
+                         {"type": "text", "text": "好的，我先读一下相关文件再改。"},
+                         {"type": "tool_use", "name": "Read",
+                          "input": {"file_path": "/tmp/project/x.py"}},
+                     ]}},
+                ],
+            )
+
+            parsed = brc.parse_session_file(session)
+
+            # timeline now reads 用户问 -> AI 答 -> 工具, so the dialogue arc is reconstructable
+            kinds = [e["type"] for e in parsed["compact_events"]]
+            self.assertEqual(kinds, ["user_prompt", "assistant", "tool"])
+            self.assertIn("好的", parsed["compact_events"][1]["text"])
+
 
 class AttachSessionMetricsTest(unittest.TestCase):
     def _session(self, rows):
