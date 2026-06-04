@@ -58,7 +58,6 @@ python3 "${SCRIPT_DIR}/prepare.py" --config "${TMP}/config.json" --date 2026-05-
 # Stage 2 — copy fixture LLM output (simulate Claude Code)
 OUTBOX="${TMP}/outbox/2026-05-10/wanhua.gu"
 cp "${FIXTURE}/llm_output/_output.personal.md" "${OUTBOX}/"
-cp "${FIXTURE}/llm_output/_output.team.md" "${OUTBOX}/"
 cp "${FIXTURE}/llm_output/_output.boss.md" "${OUTBOX}/"
 cp "${FIXTURE}/llm_output/_session_meta.json" "${OUTBOX}/"
 
@@ -70,7 +69,6 @@ python3 "${SCRIPT_DIR}/upload.py" --config "${TMP}/config.json" --date 2026-05-1
 
 # Verify
 test -f "${OUTBOX}/daily_report.personal.ack.json"
-test -f "${OUTBOX}/daily_report.team.ack.json"
 test -f "${OUTBOX}/daily_report.boss.ack.json"
 test -f "${OUTBOX}/session_card.f66e2252.ack.json"
 

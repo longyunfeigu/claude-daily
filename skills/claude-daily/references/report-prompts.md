@@ -1,6 +1,16 @@
 # Report Output Contract
 
-Use this contract after reading `report_context.json` produced by `scripts/build_report_context.py`.
+Use this contract after reading `_context.json` produced by `scripts/prepare.py`.
+
+## Contents
+
+- [Required Final Shape](#required-final-shape)
+- [Session Cards](#session-cards)
+- [Daily Report](#daily-report)
+- [Audience Modes](#audience-modes)
+- [Hallucination Guard](#hallucination-guard)
+- [Episode Guidance](#episode-guidance)
+- [Input Priority](#input-priority)
 
 ## Required Final Shape
 
@@ -20,7 +30,8 @@ Do not output only a table, only a timeline, or only a free-form reflection. A r
 
 ## Session Cards
 
-Write one card per top-level session, in chronological order:
+Write one card per top-level session, in chronological order. Personal cards
+include 9 fields. Manager cards omit `人机协作`, so they include 8 fields.
 
 ```markdown
 ## Session `<session_short>`：<short title>
@@ -52,6 +63,14 @@ Write one card per top-level session, in chronological order:
 - 下次怎么做：
 - 被推翻的想法：
 ```
+
+These fields cover different cognitive functions:
+- **过程** narrates how thinking moved (调研路径、grep 序列、推理拐点).
+- **产出** lists what artifacts were created (改了什么文件、给了什么结论).
+- **决策** crystallizes why a choice was made (X vs Y 的判断依据).
+
+Do not collapse them into a single narrative; each carries information the
+others cannot.
 
 ### Field rules
 
@@ -147,7 +166,7 @@ Use this structure exactly:
 
 ```markdown
 时间范围：<start> → <end>（timezone）
-Audience：<self|manager|mixed>
+Audience：<self|manager>
 
 ## 今日总览
 
@@ -243,9 +262,57 @@ What's wrong with the bad example: 时间精确到分钟、笔记编号外露、
 **Session 附录**
 - One line per session: `<short> <title> → tool counts；关键文件；分支/产出工件`.
 
+## Audience Modes
+
+Audience changes which fields appear, how they are worded, and how long the
+report runs. It is not just an emphasis change.
+
+| 字段 | self | manager |
+|---|---|---|
+| 今日总览 | 个人视角 | 业务影响视角 |
+| 主题分组 | ✓ | ✓ 重点（业务化措辞） |
+| 今天学到的 | ✓ | 砍 |
+| 关键决策 | ✓ | ✓ 仅业务/资源相关 |
+| 被推翻的想法 | ✓ | 砍（除非影响进度） |
+| 走过的弯路 | ✓ | 砍（除非耗显著时间） |
+| 验证结果 | ✓ 详细 | ✓ 高层化 |
+| 风险与阻塞 | ✓ | ✓ 重点 |
+| Session 附录 | ✓ 完整 | 砍或极简 |
+
+| 维度 | self | manager |
+|---|---|---|
+| 人称 | 我 | 我们 / 无主语 |
+| 技术密度 | 高（类名、命令、grep） | 低（业务名词为主） |
+| 心理活动 | 可以写 | 不写 |
+| 字数（中文） | 1500-2500 | 400-800 |
+
+Manager hard rules:
+- 成果优先；技术细节压缩到不影响判断的最小集.
+- 只保留关键风险与下一步.
+- 不展示 token、工具调用次数、源码路径，除非用户明确要求.
+- 不写"被推翻的想法"和"走过的弯路"，除非它们直接影响进度或风险判断.
+
+Manager 今日总览 example:
+> "今天完成了 CrewAI 结构化输出机制的源码级验证，并沉淀到教学文档中。核心风险是结构化输出格式可靠不等于事实可靠，后续会补最小验证案例，避免团队在使用 Agent 工具时误判结果可信度。"
+
 ## Hallucination Guard
 
-Only write claims supported by `report_context.json`.
+Only write claims supported by `_context.json`.
+
+Evidence discipline:
+- Treat top-level sessions as the report mainline.
+- Treat subagent transcripts as optional evidence only; include them only when
+  the user asks or when debugging.
+- Use file paths, commands, tool counts, web searches, token usage, and prompt
+  excerpts from `_context.json` as evidence.
+- Use `assistant_segments` to infer conclusions and insights Claude produced
+  during the session, but do not treat assistant text as proof of external
+  facts or code completion.
+- Treat segment `signals` as mechanical hints only, not importance labels.
+- Select or rewrite key points from `assistant_segments` yourself; do not
+  assume Python has already decided what matters.
+- Clearly mark cross-date reports: selected session reports may span multiple
+  real dates.
 
 Use these phrases when evidence is absent:
 

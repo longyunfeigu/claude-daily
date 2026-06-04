@@ -2,7 +2,7 @@
 
 This file is loaded by Claude Code in step 4 of the 6-step pipeline
 (see SKILL.md). It governs only the `_session_meta.json` output, not
-the 8-field session cards or 9-section daily report.
+Session Cards or Daily Reports.
 
 ## value_tag
 
