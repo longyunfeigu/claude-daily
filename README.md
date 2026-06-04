@@ -2,6 +2,21 @@
 
 把本地 Claude Code 会话记录（`~/.claude/projects/**/*.jsonl`）整理成一份可追溯的每日工作报告的 Claude Code skill。先用 Python 做确定性解析、降噪、抽取证据，再让 LLM 做语义合成（Session Card + Daily Report），最后按 PRD 上报到 Compound Daily ingestion 服务。
 
+## 让 AI 工具替你部署
+
+懒得照着下面手动装，可以把仓库地址丢给 Claude Code / Codex 这类 AI 编码工具，让它读 README 自己装。开个新会话，把下面这段贴进去：
+
+```text
+帮我部署这个 Claude Code skill：https://github.com/longyunfeigu/claude-daily
+请读它的 README，按「安装」一节做：
+1. 添加 marketplace 并安装 claude-daily 插件；
+2. 把技能目录里的 config.example.json 复制成 ~/.compound-daily/config.json，填好 member_id（如 your.name）和 endpoint_base；
+3. 检查 Python 3.7+，可选装 ccusage（npm i -g ccusage）。
+装完跑一次 dry-run（只看不发）验证。
+```
+
+> `/plugin marketplace add`、`/plugin install` 是 Claude Code 的交互命令，要你在会话里确认执行；`~/.compound-daily/config.json` 和依赖检查 AI 能直接帮你跑完。下面「安装」一节是这套步骤的完整说明，手动装也照它来。
+
 ## 安装
 
 ### 1. 添加 marketplace 并安装插件
