@@ -9,14 +9,14 @@
 在 Claude Code 里：
 
 ```text
-/plugin marketplace add <repo-url>     # push 后的 remote，如 git@your-git-host:you/claude-daily.git
+/plugin marketplace add git@github.com:longyunfeigu/claude-daily.git
 /plugin install claude-daily
 ```
 
 本地调试也可以直接添加本地路径：
 
 ```text
-/plugin marketplace add /home/guwanhua/Desktop/git/claude-daily
+/plugin marketplace add /path/to/claude-daily   # 换成你 clone 仓库的本地路径
 /plugin install claude-daily
 ```
 
