@@ -84,7 +84,7 @@ npm i -g ccusage
 ```bash
 #!/usr/bin/env bash
 # 生成并上报前一天的 claude-daily 日报
-export PATH="$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin"   # 改成你的 claude/node 所在目录（用 which claude 查）
+export PATH="$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin"   # 改成你的 claude/node 所在目录（用 which claude / which node 查）
 YESTERDAY="$(date -d 'yesterday' +%F)"                        # Linux GNU date；macOS 用：date -v-1d +%F
 claude -p "跑 claude-daily --date $YESTERDAY（正式上报，不要 dry-run）" \
   --dangerously-skip-permissions \
@@ -106,10 +106,11 @@ chmod +x ~/run-claude-daily.sh
 - **权限**：cron 无人值守、弹不了权限确认，所以加了 `--dangerously-skip-permissions`——它跳过**所有**权限检查，仅在你信任这个 skill、跑在自己机器上时用。想收窄就换成 `--allowedTools "Bash Read Write Edit Task"`（仍偏宽，因为 Bash 在内）。
 - **日志**：输出都进 `~/.compound-daily/cron.log`，失败去那看。
 - **只生成不上报**：把 prompt 换成 `跑 claude-daily dry-run --date $YESTERDAY` 即可。
+- **nvm 用户注意 ccusage**：nvm 装的 `node`/`npx` 不在上面默认 `PATH` 里，要把 `~/.config/nvm/versions/node/<版本>/bin` 也加进 `export PATH=`，否则 ccusage 取不到 token（只 WARN、计 0，报告正文照常）。
 - **直接写 crontab（不用包装脚本）也行**，但要在 crontab 顶部设 `PATH=`，且 `date` 的 `%` 必须转义成 `\%`。
 
 ## 更多
 
-工作原理、Session Card / Daily Report 的完整 schema、证据规则、受众模式见
-[`skills/claude-daily/README.zh-CN.md`](skills/claude-daily/README.zh-CN.md)，
-权威规格是 [`skills/claude-daily/SKILL.md`](skills/claude-daily/SKILL.md)。
+权威流程见 [`skills/claude-daily/SKILL.md`](skills/claude-daily/SKILL.md)；
+Session Card / Daily Report 输出契约、证据规则、受众模式见
+[`skills/claude-daily/references/report-prompts.md`](skills/claude-daily/references/report-prompts.md)。
