@@ -2,6 +2,22 @@
 
 把本地 Claude Code 会话记录（`~/.claude/projects/**/*.jsonl`）整理成一份可追溯的每日工作报告的 Claude Code skill。先用 Python 做确定性解析、降噪、抽取证据，再让 LLM 做语义合成（Session Card + Daily Report），最后按 PRD 上报到 Compound Daily ingestion 服务。
 
+## 输出长这样（脱敏示例）
+
+以下三张图是 skill 产出、在配套 Web 端里渲染的效果；内容已脱敏，仅用于展示格式与信息结构。
+
+**个人版报告** —— 给自己看的详细复盘：今日总览、主题分组、今天学到的、关键决策、被推翻的想法、走过的弯路、验证结果、风险与阻塞、Session 附录。
+
+![个人版报告](assets/personal-report.png)
+
+**老板版报告** —— 给老板看的业务摘要：今日总览、主题分组、关键决策、验证结果、风险与阻塞。
+
+![老板版报告](assets/boss-report.png)
+
+**Session Card** —— 单个会话的复盘卡片：原本想做什么 / 主要过程 / 产出 / 关键决策 / 走过的弯路 / 证据 / 人机协作 / 沉淀。
+
+![Session Card](assets/session-card.png)
+
 ## 让 AI 工具替你部署
 
 懒得照着下面手动装，可以把仓库地址丢给 Claude Code / Codex 这类 AI 编码工具，让它读 README 自己装。开个新会话，把下面这段贴进去：
@@ -126,6 +142,6 @@ chmod +x ~/run-claude-daily.sh
 
 ## 更多
 
-权威流程见 [`skills/claude-daily/SKILL.md`](skills/claude-daily/SKILL.md)；
+权威流程见 [`skills/claude-daily/SKILL.md`](../fastapi-base/.agents/skills/claude-daily/SKILL.md)；
 Session Card / Daily Report 输出契约、证据规则、受众模式见
-[`skills/claude-daily/references/report-prompts.md`](skills/claude-daily/references/report-prompts.md)。
+[`skills/claude-daily/references/report-prompts.md`](../fastapi-base/.agents/skills/claude-daily/references/report-prompts.md)。
