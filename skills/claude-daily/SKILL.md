@@ -148,7 +148,7 @@ content. Load it during step 3 and follow it exactly for:
   `人机协作`.
 - Personal `人机协作` must include both effective AI use and explicit
   bad-use / risk-signal observations when evidence exists.
-- Personal `人机协作` must also include an evidence-bound `AI 使用评分`
+- Personal `人机协作` must also include an evidence-chain-bound `AI 使用评分`
   subitem; use dimension scores, not a total score.
 - Daily Report shape: personal keeps the full 9 sections; manager applies the
   audience-specific removals and compression rules.
