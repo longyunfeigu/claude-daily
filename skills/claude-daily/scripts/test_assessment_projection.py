@@ -144,5 +144,68 @@ class ProjectSessionTest(unittest.TestCase):
         self.assertEqual(sum(1 for e in out["event_backbone"] if e["type"] == "user"), 50)
 
 
+class CliTest(unittest.TestCase):
+    def _config(self, td):
+        cfg_path = Path(td) / "config.json"
+        cfg_path.write_text(json.dumps({
+            "member_id": "wanhua.gu",
+            "endpoint_base": "http://x",
+            "endpoint_paths": {"daily_report": "/d", "session_card": "/s"},
+            "outbox_dir": str(Path(td) / "outbox"),
+            "projects_root": str(Path(td) / "projects"),
+        }), encoding="utf-8")
+        return cfg_path
+
+    def test_writes_assessment_context(self):
+        with tempfile.TemporaryDirectory() as td:
+            cfg_path = self._config(td)
+            # 1) 造一个真实 transcript jsonl
+            tx = Path(td) / "sess.jsonl"
+            rows = [
+                {"message": {"role": "user", "content": "修一下"}},
+                {"message": {"role": "assistant", "content": [
+                    {"type": "tool_use", "name": "Bash", "id": "t1",
+                     "input": {"command": "uv run python -m pytest -q"}}]}},
+                {"message": {"role": "user", "content": [
+                    {"type": "tool_result", "tool_use_id": "t1",
+                     "is_error": True, "content": "FAILED"}]}},
+                {"message": {"role": "assistant", "content": [
+                    {"type": "text", "text": "已修复"}]}},
+            ]
+            tx.write_text("\n".join(json.dumps(r) for r in rows), encoding="utf-8")
+            # 2) 造一个指向它的 _context.json
+            outbox = Path(td) / "outbox" / "2026-06-25" / "wanhua.gu"
+            outbox.mkdir(parents=True)
+            (outbox / "_context.json").write_text(json.dumps({
+                "generated_at": "2026-06-25T00:00:00Z",
+                "sessions": [{
+                    "session_id": "sess-0001", "session_short": "sess",
+                    "project_dir": "demo", "transcript_path": str(tx),
+                    "user_prompts": ["修一下"],
+                }],
+            }), encoding="utf-8")
+            # 3) 跑 CLI
+            p = subprocess.run(
+                [sys.executable, str(SCRIPT), "--config", str(cfg_path),
+                 "--date", "2026-06-25"],
+                capture_output=True, text=True)
+            self.assertEqual(0, p.returncode, p.stderr)
+            out = json.loads((outbox / "_assessment_context.json").read_text())
+            self.assertEqual(out["member_id"], "wanhua.gu")
+            sess = out["sessions"][0]
+            self.assertEqual(sess["claims"][0]["prev_verify_outcome"], "fail")
+            self.assertEqual(sess["user_prompts"], ["修一下"])
+
+    def test_missing_context_errors(self):
+        with tempfile.TemporaryDirectory() as td:
+            cfg_path = self._config(td)
+            p = subprocess.run(
+                [sys.executable, str(SCRIPT), "--config", str(cfg_path),
+                 "--date", "2026-06-25"],
+                capture_output=True, text=True)
+            self.assertNotEqual(0, p.returncode)
+            self.assertIn("_context.json", p.stderr)
+
+
 if __name__ == "__main__":
     unittest.main()

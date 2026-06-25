@@ -180,3 +180,65 @@ def project_session(rows):
         "danger_ops": danger_ops,
         "event_backbone": backbone,
     }
+
+
+def load_session_rows(path):
+    rows = []
+    with open(path, encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                rows.append(json.loads(line))
+            except json.JSONDecodeError:
+                continue
+    return rows
+
+
+def main(argv=None):
+    ap_ = argparse.ArgumentParser(description="AI assessment projection layer")
+    ap_.add_argument("--date", required=True)
+    ap_.add_argument("--config", default=None)
+    args = ap_.parse_args(argv)
+
+    try:
+        config = cfg.load(Path(args.config) if args.config else None)
+    except (FileNotFoundError, ValueError) as e:
+        print(f"ERROR: {e}", file=sys.stderr)
+        return 2
+
+    member_id = config["member_id"]
+    outbox = paths.member_outbox(config["outbox_dir"], args.date, member_id)
+    ctx_path = outbox / "_context.json"
+    if not ctx_path.exists():
+        print(f"ERROR: {ctx_path} not found; run prepare.py first", file=sys.stderr)
+        return 3
+
+    context = json.loads(ctx_path.read_text(encoding="utf-8"))
+    out_sessions = []
+    for s in context.get("sessions", []):
+        tp = s.get("transcript_path")
+        signals = (project_session(load_session_rows(tp))
+                   if tp and Path(tp).exists() else {})
+        out_sessions.append({
+            "session_id": s.get("session_id"),
+            "session_short": s.get("session_short"),
+            "project_dir": s.get("project_dir"),
+            "user_prompts": s.get("user_prompts", []),
+            **signals,
+        })
+
+    out = {
+        "generated_at": context.get("generated_at"),
+        "date_filter": args.date,
+        "member_id": member_id,
+        "sessions": out_sessions,
+    }
+    paths.atomic_write_json(outbox / "_assessment_context.json", out)
+    print(f"✓ _assessment_context.json written ({len(out_sessions)} sessions)")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
