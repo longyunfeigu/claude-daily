@@ -71,9 +71,9 @@ def has_claim(text):
 
 
 def normalize_cmd(cmd):
-    """归一化键：取最后一段管道、压空白、截断，让"同一条命令"重复可被聚合。"""
-    last = (cmd or "").split("&&")[-1].split("|")[-1]
-    return re.sub(r"\s+", " ", last).strip()[:60]
+    """归一化键：压空白 + 截断整条命令，让"同一条命令"重复可被聚合。
+    不按 &&/| 拆段——拆段会把 `verify | tail -25` 误归成无意义的 `tail -25`。"""
+    return re.sub(r"\s+", " ", (cmd or "")).strip()[:80]
 
 
 def detect_loops(commands):
