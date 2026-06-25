@@ -46,5 +46,19 @@ class CommandOutcomeTest(unittest.TestCase):
         self.assertIsNone(ap.command_outcome("explore", True, ""))
 
 
+class DangerOpTest(unittest.TestCase):
+    def test_rm_rf_on_tmp_is_benign(self):
+        self.assertFalse(ap.is_danger_op("rm -rf /tmp/hb-test"))
+
+    def test_rm_rf_on_real_path_is_danger(self):
+        self.assertTrue(ap.is_danger_op("rm -rf ~/project/src"))
+
+    def test_git_reset_hard_is_danger(self):
+        self.assertTrue(ap.is_danger_op("git reset --hard origin/main"))
+
+    def test_plain_command_not_danger(self):
+        self.assertFalse(ap.is_danger_op("ls -la"))
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -45,3 +45,17 @@ def command_outcome(kind, is_error, output):
     if is_error or ERR_RE.search(output or ""):
         return "fail"
     return "ok"
+
+
+DANGER_RE = re.compile(
+    r"\brm\s+-rf?\b|\bgit\s+reset\s+--hard\b|\bdrop\s+table\b|\btruncate\b", re.I)
+THROWAWAY_RE = re.compile(r"/tmp/|/var/tmp/|/private/tmp/")
+
+
+def is_danger_op(cmd):
+    """Destructive op NOT confined to a throwaway dir (PRD §18.3 path-aware)."""
+    if not DANGER_RE.search(cmd or ""):
+        return False
+    if THROWAWAY_RE.search(cmd or ""):
+        return False
+    return True
