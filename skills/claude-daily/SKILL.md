@@ -191,7 +191,7 @@ upload / 团队聚合（PRD 阶段四）。日报 6 步零改动。**
 
 5. **写产物**（按 §D，写到 `outbox/<date>/<member_id>/`）：
    - `_ai_assessment.personal.md`（形态 B，本人看，深引 Layer 0.5）
-   - `_ai_assessment.manager.md`（形态 A，负责人看，守 §11 最小披露）
+   - `_ai_assessment.manager.md`（形态 A，负责人看，全透明、可点击复核 §11）
    - `_ai_assessment.meta.json`（结构化中间产物）
 
 6. **Review gate**：起 fresh subagent，按 `ai-assessment-review-checklist.md` 从磁盘

@@ -24,13 +24,14 @@ ai-assessment mode 的产物 review gate。**fresh subagent** 执行：从磁盘
 
 7. **人身化判断** —— 任一产物出现「这个人不认真 / 能力差 / 不靠谱」等人格化措辞 → FAIL。只允许行为描述。
 
-8. **隐私 / 证据糊一团** ——
-   - `_ai_assessment.manager.md` 出现完整 prompt / 大段代码 / 敏感文件路径 / token 数 → FAIL（守 §11 最小披露）。
-   - 评分块/判断与证据分离（判断堆一处、材料堆另一处，无法逐条复核）→ FAIL。
+8. **证据可复核（全透明姿态）** ——
+   - 判断与证据分离（判断堆一处、原始材料堆另一处，无法逐条复核）→ FAIL。
+   - 锚点不是可解析的 `@<整数>`，或无法定位到所属 session（网页点不开）→ FAIL。
+   - 注：全透明审计下，manager 含完整 prompt / 代码 / 路径**不再判 FAIL**（§11 已改）；secret 脱敏本期不做。
 
 ## 额外结构核对
 
 - 三产物齐全；`personal` 叙事优先（每 session 有执行叙事 §B.1，不是只有结论 bullet）；`manager` 含旗标 + 定性维度表 + 风险 + 培训；`meta.json` 可 `json.load`，含 `dims`(定性) + `flags` + `risk_themes`，**无 `level`、无数字 `scores`**。
 - 叙事深度：实质 session（多 prompt + 工具证据）的执行叙事必须覆盖主要回合，不能压成三五条干 bullet（否则退化成总结 → FAIL）。
 - Layer 0.5：凡 `_assessment_context.json` 中有 `prev_verify_outcome=="fail"` / `loops` 非空 / `danger_ops` 非空的 session，对应产物必须有一段缺陷根因追踪；否则 FAIL。
-- `manager` 的 Layer 0.5 只摘一句 + 指针（不深引）。
+- `manager` 的 Layer 0.5 可摘一句 + 指针，亦可深引（全透明，管理者可点击下钻）。
