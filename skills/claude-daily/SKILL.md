@@ -181,13 +181,13 @@ upload / 团队聚合（PRD 阶段四）。日报 6 步零改动。**
 
 3. **Per-session MAP（subagent fan-out）**：对 `_assessment_context.json` 里每个
    session 起一个 subagent，只喂该 session 的投影记录（必要时加 `_context.json` 的
-   `compact_events`），按 `ai-assessment-prompts.md` §B 产一份结构化证据记录（8 维
-   自包含评分块 + Layer 0.5 缺陷根因追踪 + 强制极值 + 置信度）。每个 session 独占
-   一个上下文窗口，主线程只收结构化结果——长 transcript 不会撑爆上下文。无 subagent
-   时主线程逐 session 串行做，但一次只看一个 session 的投影记录。
+   `compact_events`），按 `ai-assessment-prompts.md` §B 产一份记录（**执行叙事（逐回合）
+   + Layer 0.5 缺陷根因 + 8 维定性判断（强/到位/有缺口/证据不足，无数字）+ 置信度**）。
+   每个 session 独占一个上下文窗口，主线程只收结构化结果——长 transcript 不会撑爆上下文。
+   无 subagent 时主线程逐 session 串行做，但一次只看一个 session 的投影记录。
 
-4. **个人 REDUCE**：主线程按 §C 把 N 份 MAP 记录聚合成人级画像（不平均、关键维度
-   取下界 + 标波动、红线压顶、置信度传播）。
+4. **个人 REDUCE**：主线程按 §C 聚合成人级画像（**不评级、不平均、不排名**；一句话判断
+   + 旗标（红线命中 / 证据不足-需人工复核 / 本期无明显风险）+ 强项/风险/培训主题 + 置信度）。
 
 5. **写产物**（按 §D，写到 `outbox/<date>/<member_id>/`）：
    - `_ai_assessment.personal.md`（形态 B，本人看，深引 Layer 0.5）
