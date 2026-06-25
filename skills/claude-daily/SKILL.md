@@ -29,6 +29,9 @@ When the user says one of:
   → Use specified date instead of today.
 - "重新发一遍" / "force"
   → Pass `--force` to upload (re-uploads regardless of existing acks).
+- "跑 claude-daily ai-assessment" / "生成 AI 使用能力评估" / "生成管理者版 AI 使用评估"
+  → Run the **AI 使用评估模式** below, NOT the 6-step daily pipeline. 默认评估
+    指定 `--date`（或你给的多日窗口），单人；只产本机文件，不 upload。
 
 If the user's intent is ambiguous (e.g. "今天看一下"), ask once before
 starting. Default the mode slot to dry-run when ambiguous, not auto-upload.
@@ -157,6 +160,46 @@ content. Load it during step 3 and follow it exactly for:
 
 `references/payload-prompts.md` governs only `_session_meta.json`.
 `references/content-review-checklist.md` governs the review gate before emit.
+
+## AI 使用评估模式（ai-assessment）
+
+独立于上面的日报流水线。日报回答「今天做了什么」；本模式回答「这个人如何使用
+AI、有什么风险与训练需求」（PRD §2）。**单人 MVP：只产本机文件，不接 emit /
+upload / 团队聚合（PRD 阶段四）。日报 6 步零改动。**
+
+`references/ai-assessment-prompts.md` 是评分 / 缺陷根因 / reduce 的唯一真相来源；
+`references/ai-assessment-review-checklist.md` governs 本模式的 review gate。
+
+### 流程
+
+1. **Prepare**：`python3 scripts/prepare.py --date <date>`（复用，产 `_context.json`）。
+   多日评估对每个日期各跑一次。
+
+2. **Projection**：`python3 scripts/assessment_projection.py --date <date>`，产
+   `_assessment_context.json`（4 信号：命令成败 / 编辑频次不去重 / claim↔验证关联 /
+   全量事件骨架）。`_context.json` 不存在会报错要求先跑 prepare。
+
+3. **Per-session MAP（subagent fan-out）**：对 `_assessment_context.json` 里每个
+   session 起一个 subagent，只喂该 session 的投影记录（必要时加 `_context.json` 的
+   `compact_events`），按 `ai-assessment-prompts.md` §B 产一份结构化证据记录（8 维
+   自包含评分块 + Layer 0.5 缺陷根因追踪 + 强制极值 + 置信度）。每个 session 独占
+   一个上下文窗口，主线程只收结构化结果——长 transcript 不会撑爆上下文。无 subagent
+   时主线程逐 session 串行做，但一次只看一个 session 的投影记录。
+
+4. **个人 REDUCE**：主线程按 §C 把 N 份 MAP 记录聚合成人级画像（不平均、关键维度
+   取下界 + 标波动、红线压顶、置信度传播）。
+
+5. **写产物**（按 §D，写到 `outbox/<date>/<member_id>/`）：
+   - `_ai_assessment.personal.md`（形态 B，本人看，深引 Layer 0.5）
+   - `_ai_assessment.manager.md`（形态 A，负责人看，守 §11 最小披露）
+   - `_ai_assessment.meta.json`（结构化中间产物）
+
+6. **Review gate**：起 fresh subagent，按 `ai-assessment-review-checklist.md` 从磁盘
+   读三产物 + `_assessment_context.json` 核对，写 `_review.assessment.md`
+   （`Result: PASS|FAIL`）。FAIL → 只重做被点名产物再 review 一次；二次仍 FAIL 停下
+   报告。无 subagent 时主线程跑同一清单并标 `Mode: main-thread`，不得跳过。
+
+到此为止——不 emit、不 upload。产物是本机文件，供本人或本人转交负责人。
 
 ## Script Notes
 
