@@ -87,5 +87,62 @@ class ClaimAndLoopTest(unittest.TestCase):
         self.assertEqual(ap.detect_loops(cmds), {})
 
 
+def _assistant_bash(cmd, tuid):
+    return {"message": {"role": "assistant", "content": [
+        {"type": "tool_use", "name": "Bash", "id": tuid, "input": {"command": cmd}}]}}
+
+
+def _assistant_edit(path):
+    return {"message": {"role": "assistant", "content": [
+        {"type": "tool_use", "name": "Edit", "input": {"file_path": path}}]}}
+
+
+def _assistant_text(text):
+    return {"message": {"role": "assistant", "content": [{"type": "text", "text": text}]}}
+
+
+def _tool_result(tuid, is_error, text):
+    return {"message": {"role": "user", "content": [
+        {"type": "tool_result", "tool_use_id": tuid, "is_error": is_error,
+         "content": text}]}}
+
+
+def _user(text):
+    return {"message": {"role": "user", "content": text}}
+
+
+class ProjectSessionTest(unittest.TestCase):
+    def test_claim_pairs_with_preceding_failed_verify(self):
+        rows = [
+            _user("帮我修一下"),
+            _assistant_bash("uv run python -m pytest -q", "t1"),
+            _tool_result("t1", True, "FAILED tests/x.py"),
+            _assistant_text("好了，已修复"),
+        ]
+        out = ap.project_session(rows)
+        self.assertEqual(len(out["claims"]), 1)
+        self.assertEqual(out["claims"][0]["prev_verify_outcome"], "fail")
+
+    def test_edit_frequency_not_deduped(self):
+        rows = [_assistant_edit("/p/walkthrough.md") for _ in range(3)]
+        out = ap.project_session(rows)
+        self.assertEqual(out["edit_events"][0], {"file": "walkthrough.md", "n": 3})
+
+    def test_explore_nonzero_not_a_failure(self):
+        rows = [
+            _assistant_bash("grep -n foo bar.py", "g1"),
+            _tool_result("g1", True, ""),
+        ]
+        out = ap.project_session(rows)
+        self.assertEqual(out["commands"][0]["outcome"], None)
+        self.assertEqual(out["loops"], {})
+
+    def test_backbone_covers_all_rows(self):
+        rows = [_user(f"msg {i}") for i in range(50)]
+        out = ap.project_session(rows)
+        # 全量覆盖：50 条 user 都在骨架里（不砍头尾）
+        self.assertEqual(sum(1 for e in out["event_backbone"] if e["type"] == "user"), 50)
+
+
 if __name__ == "__main__":
     unittest.main()
