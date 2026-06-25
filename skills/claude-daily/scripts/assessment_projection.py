@@ -59,3 +59,28 @@ def is_danger_op(cmd):
     if THROWAWAY_RE.search(cmd or ""):
         return False
     return True
+
+
+CLAIM_RE = re.compile(
+    r"(完成了|搞定|已修复|修好了|done[\.\!\s—-]|fixed|通过了|解决了|"
+    r"应该(?:可以|没问题|好)了|implemented)", re.I)
+
+
+def has_claim(text):
+    return bool(CLAIM_RE.search(text or ""))
+
+
+def normalize_cmd(cmd):
+    """归一化键：取最后一段管道、压空白、截断，让"同一条命令"重复可被聚合。"""
+    last = (cmd or "").split("&&")[-1].split("|")[-1]
+    return re.sub(r"\s+", " ", last).strip()[:60]
+
+
+def detect_loops(commands):
+    """同一归一化命令的验证失败 ≥2 次 = 补丁套补丁（PRD §18.3）。"""
+    fails = {}
+    for c in commands:
+        if c.get("kind") == "verify" and c.get("outcome") == "fail":
+            key = normalize_cmd(c.get("cmd", ""))
+            fails[key] = fails.get(key, 0) + 1
+    return {k: n for k, n in fails.items() if n >= 2}

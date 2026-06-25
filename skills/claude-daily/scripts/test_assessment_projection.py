@@ -60,5 +60,32 @@ class DangerOpTest(unittest.TestCase):
         self.assertFalse(ap.is_danger_op("ls -la"))
 
 
+class ClaimAndLoopTest(unittest.TestCase):
+    def test_has_claim(self):
+        self.assertTrue(ap.has_claim("好的，已修复了这个问题"))
+        self.assertTrue(ap.has_claim("All tests passing — done."))
+        self.assertFalse(ap.has_claim("我先看一下这个文件"))
+
+    def test_detect_loops_flags_repeated_verify_failure(self):
+        cmds = [
+            {"cmd": "uv run python build-data.py", "kind": "verify", "outcome": "fail"},
+            {"cmd": "uv run python build-data.py", "kind": "verify", "outcome": "fail"},
+            {"cmd": "uv run python build-data.py", "kind": "verify", "outcome": "fail"},
+        ]
+        loops = ap.detect_loops(cmds)
+        self.assertEqual(loops[ap.normalize_cmd("uv run python build-data.py")], 3)
+
+    def test_single_failure_is_not_a_loop(self):
+        cmds = [{"cmd": "pytest", "kind": "verify", "outcome": "fail"}]
+        self.assertEqual(ap.detect_loops(cmds), {})
+
+    def test_explore_failures_ignored(self):
+        cmds = [
+            {"cmd": "grep x a", "kind": "explore", "outcome": None},
+            {"cmd": "grep x a", "kind": "explore", "outcome": None},
+        ]
+        self.assertEqual(ap.detect_loops(cmds), {})
+
+
 if __name__ == "__main__":
     unittest.main()
