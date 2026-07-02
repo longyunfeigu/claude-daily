@@ -123,10 +123,36 @@ class ProjectSessionTest(unittest.TestCase):
         self.assertEqual(len(out["claims"]), 1)
         self.assertEqual(out["claims"][0]["prev_verify_outcome"], "fail")
 
-    def test_edit_frequency_not_deduped(self):
+    def test_edit_frequency_not_deduped_and_full_path(self):
         rows = [_assistant_edit("/p/walkthrough.md") for _ in range(3)]
         out = ap.project_session(rows)
-        self.assertEqual(out["edit_events"][0], {"file": "walkthrough.md", "n": 3})
+        # v2: 保留完整路径（沉淀复用维度需要知道改的是哪类文件）
+        self.assertEqual(out["edit_events"][0], {"file": "/p/walkthrough.md", "n": 3})
+
+    def test_v2_assistant_turns_in_backbone(self):
+        rows = [_user("问题"), _assistant_text("这是我的分析" * 100)]
+        out = ap.project_session(rows)
+        a = [e for e in out["event_backbone"] if e["type"] == "assistant"]
+        self.assertEqual(len(a), 1)
+        # 回复被截断到 ASSISTANT_TEXT_CAP，供下钻还原对话
+        self.assertLessEqual(len(a[0]["text"]), ap.ASSISTANT_TEXT_CAP)
+
+    def test_v2_user_text_not_truncated_at_200(self):
+        long_prompt = "需求描述" * 100  # 400 chars
+        rows = [_user(long_prompt)]
+        out = ap.project_session(rows)
+        u = [e for e in out["event_backbone"] if e["type"] == "user"][0]
+        self.assertEqual(u["text"], long_prompt)
+
+    def test_v2_command_output_snippet_attached(self):
+        rows = [
+            _assistant_bash("uv run python -m pytest -q", "t1"),
+            _tool_result("t1", False, "3 passed in 0.5s"),
+        ]
+        out = ap.project_session(rows)
+        self.assertEqual(out["commands"][0]["out"], "3 passed in 0.5s")
+        cmd_ev = [e for e in out["event_backbone"] if e["type"] == "verify"][0]
+        self.assertEqual(cmd_ev["out"], "3 passed in 0.5s")
 
     def test_explore_nonzero_not_a_failure(self):
         rows = [

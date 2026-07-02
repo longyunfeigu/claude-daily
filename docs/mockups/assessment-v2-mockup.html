@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<title>AI 使用评估 v2 mockup（真实数据重写）</title>
+<style>
+  body { font-family: -apple-system, "PingFang SC", sans-serif; background:#f5f6f8; margin:0; padding:40px; color:#1a1a1a; }
+  .page { max-width: 860px; margin: 0 auto 48px; background:#fff; border-radius:12px; padding:36px 44px; box-shadow:0 1px 4px rgba(0,0,0,.08); }
+  .tag { display:inline-block; padding:2px 10px; border-radius:10px; font-size:13px; font-weight:600; }
+  .tag.warn { background:#fff3d6; color:#8a6100; }
+  .tag.red { background:#ffe3e3; color:#b30000; }
+  .tag.ok { background:#e2f5e6; color:#1c7a33; }
+  .tag.gray { background:#eee; color:#777; }
+  h1 { font-size:22px; margin:0 0 4px; }
+  h2 { font-size:16px; margin:28px 0 10px; color:#333; }
+  .sub { color:#888; font-size:13px; margin-bottom:18px; }
+  .verdict { font-size:17px; line-height:1.7; background:#f0f4ff; border-left:4px solid #3b6cff; padding:14px 18px; border-radius:6px; }
+  .verdict b { color:#1a3fb0; }
+  .moment { border:1px solid #e8e8e8; border-radius:10px; padding:14px 18px; margin:10px 0; }
+  .moment .head { font-weight:700; margin-bottom:6px; }
+  .moment .quote { color:#555; background:#fafafa; border-radius:6px; padding:8px 12px; font-size:14px; margin:6px 0; }
+  .evidence { color:#3b6cff; font-size:13px; cursor:pointer; }
+  .dimrow { display:flex; align-items:baseline; padding:7px 0; border-bottom:1px dashed #eee; font-size:15px; }
+  .dimrow .name { width:110px; font-weight:600; flex-shrink:0; }
+  .dimrow .judge { width:120px; flex-shrink:0; }
+  .dimrow .note { color:#666; font-size:14px; }
+  .rx li { margin:8px 0; line-height:1.6; }
+  table.team { width:100%; border-collapse:collapse; font-size:15px; }
+  table.team th { text-align:left; color:#888; font-weight:500; font-size:13px; border-bottom:1px solid #ddd; padding:6px 10px; }
+  table.team td { padding:10px; border-bottom:1px solid #f0f0f0; }
+  table.team tr:hover { background:#fafbff; }
+  .note-banner { background:#fffbe8; border:1px solid #f0e0a0; border-radius:8px; padding:10px 16px; font-size:13px; color:#7a6200; margin-bottom:24px; }
+  .level { font-size:13px; color:#666; }
+  .level b { color:#1a1a1a; font-size:15px; }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <div class="note-banner">⚠ 这是 mockup：同一份 2026-07-01 真实数据的另一种写法。「水平档位」是提案（现有设计禁止评级，启用与否你拍板）。蓝色"查看证据"在真实实现里就是现在已有的锚点下钻。</div>
+
+  <h1>wanhua.gu 的 AI 使用评估</h1>
+  <div class="sub">2026-07-01 · 26 个会话（其中 17 个有实质工作）· 评估可信度：中等</div>
+
+  <p>
+    <span class="tag warn">🟡 有一处值得你过问</span>
+    <span class="level" style="margin-left:14px;">水平档位（提案）：<b>会驾驭，未沉淀</b> ── 熟练期 · 4 档中第 3 档</span>
+  </p>
+
+  <h2>30 秒结论</h2>
+  <div class="verdict">
+    这个人<b>明显是在指挥 AI，而不是被 AI 带着走</b>：给 AI 派活时目标明确，AI 说"做完了"他会亲手验证，AI 出错他当轮就能纠正。
+    需要你过问的一件事：<b>他把 AI 的安全确认全局关掉了</b>——今后 AI 执行危险操作（如批量删除）前不会再请示。
+    最大的提升空间：一整天 11 次解决环境问题，<b>一次都没有把经验记下来</b>，同类问题下次还得重来。
+  </div>
+
+  <h2>三个说明问题的瞬间</h2>
+
+  <div class="moment">
+    <div class="head">🏆 高光：不信 AI 的口头汇报，用事实戳穿</div>
+    AI 报告"代理配置已生效"，他不接受口头结论，把真实的网络测试结果直接贴回去打脸，AI 被迫重新诊断，问题最终真正解决。
+    <div class="quote">他贴出的实测：「为什么 % ping google.com …全部超时」「curl https://api.myip.com 根本没有任何返回」</div>
+    <span class="evidence">▶ 查看当时的完整对话</span>
+  </div>
+
+  <div class="moment">
+    <div class="head">⚠️ 隐患：一句话关掉了 AI 的全部安全确认</div>
+    他嫌 AI 反复请示麻烦，让 AI 把"执行前询问"永久关闭。当天 AI 就执行过一次不可逆的批量删除（那次删之前 AI 自己先核对了目标，没出事）。护栏关闭 + 他习惯说"你全权帮我操作"，这个组合建议你和他聊一次。
+    <div class="quote">他的原话：「为什么现在总是停下来询问我，我想把安全模式全关闭」</div>
+    <span class="evidence">▶ 查看当时的完整对话</span>
+  </div>
+
+  <div class="moment">
+    <div class="head">💡 模式：会解决问题，不留下经验</div>
+    全天解决了大量环境问题（网络代理、容器、终端配置），全部只存在于和 AI 的对话里——没有笔记、没有文档、没有让 AI 记住。他自己下次要重摸一遍，团队更用不上。这是跨越多个会话的稳定习惯，不是偶然。
+    <span class="evidence">▶ 查看涉及的 5 个会话</span>
+  </div>
+
+  <h2>五个能力面（判断在前，证据点开看）</h2>
+  <div class="dimrow"><span class="name">指挥 AI</span><span class="tag ok judge">强</span><span class="note">目标给得清楚，AI 跑偏当轮就纠，关键决定自己拍板 <span class="evidence">证据</span></span></div>
+  <div class="dimrow"><span class="name">验证结果</span><span class="tag ok judge">强</span><span class="note">重要的事必亲手验证，不信 AI 自述 <span class="evidence">证据</span></span></div>
+  <div class="dimrow"><span class="name">控制风险</span><span class="tag warn judge">有隐患</span><span class="note">操作前会确认对象，但主动关掉了安全护栏 <span class="evidence">证据</span></span></div>
+  <div class="dimrow"><span class="name">设定边界</span><span class="tag warn judge">偶尔做</span><span class="note">出现过一次范本（"先讨论不要安装"），多数时候靠事后纠偏 <span class="evidence">证据</span></span></div>
+  <div class="dimrow"><span class="name">沉淀经验</span><span class="tag red judge">缺失</span><span class="note">解决了很多问题，几乎没留下可复用的东西 <span class="evidence">证据</span></span></div>
+
+  <h2>如果只让他改一件事</h2>
+  <ul class="rx">
+    <li><b>把安全确认改回"重要操作要问"</b>，只对可信的日常操作放行——和他 10 分钟就能定好白名单。</li>
+    <li>其次：每次解决完环境问题，让 AI 顺手把结论记进笔记（一句话的习惯，收益最直接）。</li>
+  </ul>
+
+  <div class="sub" style="margin-top:26px;">样本说明：单日数据，结论请勿当作稳定能力定论；9 个纯闲聊会话未计入判断。</div>
+</div>
+
+<div class="page">
+  <h1>团队 AI 使用看板（示意）</h1>
+  <div class="sub">每周扫一遍，只有黄/红需要行动 · 除 wanhua.gu 外为虚构示例</div>
+  <table class="team">
+    <tr><th>成员</th><th>信号</th><th>水平档位（提案）</th><th>最需要你过问的一件事</th></tr>
+    <tr><td><b>zhang.san</b></td><td><span class="tag red">🔴 需要介入</span></td><td>上手期 · 第 1 档</td><td>AI 生成的代码没看没测直接合入，本周 3 次</td></tr>
+    <tr><td><b>wanhua.gu</b></td><td><span class="tag warn">🟡 值得过问</span></td><td>熟练期 · 第 3 档</td><td>关掉了 AI 的全部安全确认</td></tr>
+    <tr><td><b>li.si</b></td><td><span class="tag ok">🟢 状态健康</span></td><td>熟练期 · 第 3 档</td><td>—</td></tr>
+    <tr><td><b>wang.wu</b></td><td><span class="tag gray">⚪ 数据不足</span></td><td>无法判断</td><td>本周仅 2 个轻量会话，下周再看</td></tr>
+  </table>
+  <div class="sub" style="margin-top:18px;">点任意一行 → 进入上面那种个人页。</div>
+</div>
+
+</body>
+</html>

@@ -99,14 +99,24 @@ def _text_of(content):
                      if isinstance(b, dict) and b.get("type") == "text")
 
 
+USER_TEXT_CAP = 2000       # user 原话全量为目标；防御性上限
+ASSISTANT_TEXT_CAP = 600    # AI 每轮回复摘要，供下钻还原对话
+CMD_CAP = 500
+OUTPUT_SNIPPET_CAP = 300
+
+
 def project_session(rows):
-    """单 session 投影：4 信号 + 全量事件骨架 + claim↔验证关联。"""
+    """单 session 投影：4 信号 + 全量事件骨架 + claim↔验证关联。
+
+    骨架事件带全量 user 原话 / AI 回复摘要 / 命令输出片段（out 字段），
+    支撑前端「查看完整对话」下钻（评估 v2）。
+    """
     commands = []            # [{"cmd","kind","outcome"}]
-    edit_counts = {}         # file -> n（不去重）
+    edit_counts = {}         # 完整路径 -> n（不去重）
     claims = []
     danger_ops = []
     backbone = []
-    pending = {}             # tool_use_id -> commands 下标
+    pending = {}             # tool_use_id -> (commands 下标, backbone 下标)
     last_verify = None       # (cmd, outcome) 最近一次已解析的验证命令
 
     for i, r in enumerate(rows):
@@ -115,7 +125,10 @@ def project_session(rows):
         content = msg.get("content")
 
         if role == "assistant":
-            t = _text_of(content)
+            t = _text_of(content).strip()
+            if t:
+                backbone.append({"i": i, "type": "assistant",
+                                 "text": t[:ASSISTANT_TEXT_CAP]})
             if has_claim(t):
                 m = CLAIM_RE.search(t)
                 snip = t[max(0, m.start() - 20):m.start() + 40].strip()
@@ -133,21 +146,20 @@ def project_session(rows):
                 if nm == "Bash":
                     cmd = (inp.get("command") or "").strip()
                     kind = classify_command(cmd)
-                    commands.append({"cmd": cmd[:200], "kind": kind, "outcome": None})
-                    tuid = b.get("id")
-                    if tuid:
-                        pending[tuid] = len(commands) - 1
-                    if is_danger_op(cmd):
-                        danger_ops.append({"cmd": cmd[:200]})
+                    commands.append({"cmd": cmd[:CMD_CAP], "kind": kind, "outcome": None})
                     backbone.append({"i": i,
                                      "type": "verify" if kind == "verify" else "cmd",
-                                     "text": cmd[:120]})
+                                     "text": cmd[:CMD_CAP]})
+                    tuid = b.get("id")
+                    if tuid:
+                        pending[tuid] = (len(commands) - 1, len(backbone) - 1)
+                    if is_danger_op(cmd):
+                        danger_ops.append({"cmd": cmd[:CMD_CAP]})
                 elif nm in ("Edit", "Write", "MultiEdit", "NotebookEdit"):
                     fp = inp.get("file_path") or inp.get("notebook_path") or ""
-                    name = fp.rsplit("/", 1)[-1]
-                    if name:
-                        edit_counts[name] = edit_counts.get(name, 0) + 1
-                        backbone.append({"i": i, "type": "edit", "text": name})
+                    if fp:
+                        edit_counts[fp[:200]] = edit_counts.get(fp[:200], 0) + 1
+                        backbone.append({"i": i, "type": "edit", "text": fp[:200]})
 
         elif role == "user":
             for b in _blocks(content):
@@ -157,10 +169,16 @@ def project_session(rows):
                     rtext = res if isinstance(res, str) else " ".join(
                         x.get("text", "") for x in _blocks(res) if isinstance(x, dict))
                     if tuid in pending:
-                        idx = pending[tuid]
+                        idx, bidx = pending[tuid]
                         kind = commands[idx]["kind"]
                         outcome = command_outcome(kind, bool(b.get("is_error")), rtext)
                         commands[idx]["outcome"] = outcome
+                        snippet = rtext.strip()[:OUTPUT_SNIPPET_CAP]
+                        if snippet:
+                            commands[idx]["out"] = snippet
+                            backbone[bidx]["out"] = snippet
+                        if b.get("is_error") and kind != "verify":
+                            commands[idx]["exit_error"] = True
                         if outcome == "fail":
                             backbone.append({"i": i, "type": "tool_fail",
                                              "text": commands[idx]["cmd"][:80]})
@@ -169,7 +187,7 @@ def project_session(rows):
             t = _text_of(content).strip()
             if t and not t.startswith("Caveat") and "<command-" not in t \
                     and "tool_result" not in t and "[Request interrupted" not in t:
-                backbone.append({"i": i, "type": "user", "text": t[:200]})
+                backbone.append({"i": i, "type": "user", "text": t[:USER_TEXT_CAP]})
 
     return {
         "commands": commands,
