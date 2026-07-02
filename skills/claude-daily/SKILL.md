@@ -195,7 +195,14 @@ upload / 团队聚合（PRD 阶段四）。日报 6 步零改动。**
    （`Result: PASS|FAIL`）。FAIL → 只重做被点名产物再 review 一次；二次仍 FAIL 停下
    报告。无 subagent 时主线程跑同一清单并标 `Mode: main-thread`，不得跳过。
 
-到此为止——不 emit、不 upload。产物是本机文件，供本人或本人转交负责人。
+7. **Upload（默认）**：review PASS 后运行
+   `python3 scripts/upload_assessment.py --date <date>`，把三产物 +
+   `_assessment_context.json` 的 event_backbone 组成 `ai_assessment.json`
+   payload，POST 到 `endpoint_paths.ai_assessment`（缺省
+   `/api/v1/ingest/ai-assessments`）。dry-run / "只看不发" 时跳过本步。
+   Show stdout（✓/✗ 一行）；失败报服务器错误信息，不自动重试第二次。
+
+评估不走 emit（无 Session Card 拆分需求）；payload 由 upload_assessment 直接组装。
 
 ## Script Notes
 

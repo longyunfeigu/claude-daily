@@ -3,7 +3,8 @@
   "endpoint_base": "https://your-compound-daily-host",
   "endpoint_paths": {
     "daily_report": "/api/v1/ingest/daily-reports",
-    "session_card": "/api/v1/ingest/session-cards"
+    "session_card": "/api/v1/ingest/session-cards",
+    "ai_assessment": "/api/v1/ingest/ai-assessments"
   },
   "outbox_dir": "~/.local/state/compound-daily/outbox",
   "projects_root": "~/.claude/projects"
