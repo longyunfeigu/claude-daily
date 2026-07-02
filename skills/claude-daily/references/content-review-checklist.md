@@ -35,8 +35,10 @@ Fail the review if any item below is violated.
 - Personal report keeps all 9 required Daily Report sections.
 - Manager report omits `今天学到的`, `被推翻的想法`, `走过的弯路`, and usually
   `Session 附录`, unless a removed section directly affects schedule or risk.
-- Every Session Card in `_output.personal.md` contains the 9 required fields in
-  order (原本想做什么/主要过程/产出/关键决策/差距/走过的弯路/证据/人机协作/沉淀).
+- Every Session Card in `_output.personal.md` contains the 8 required fields in
+  order (原本想做什么/主要过程/产出/关键决策/差距/走过的弯路/证据/沉淀).
+- No Session Card (personal or manager) contains a `人机协作` field or an
+  `AI 使用评分` block; AI 使用分析归 ai-assessment 模式，不进日报。
 - `主要过程` 按回合/阶段叙事并覆盖到主要回合；不应被压成三五条干 bullet（10+ 回合的 session 尤其）。
 - `_session_meta.json` has one entry per top-level session and each `summary`
   is at most 80 Unicode characters.
@@ -62,23 +64,6 @@ Fail the review if any item below is violated.
 - `走过的弯路` points to revert/reset/abandoned-path/user-reversal evidence;
   otherwise the report uses the empty phrase.
 - `验证结果` names missing verification explicitly with `未发现明确验证证据`.
-
-### 人机协作（仅 personal）
-
-- personal 卡片每张都有 `人机协作`，含六子项：协作方式 / 怎么提问 / 怎么驾驭 / 哪些做得好 / 哪些用得不好 / AI 使用评分；manager 卡片不应出现该字段。
-- 正文无学术黑话（acceleration / delegation / Dependency Ratio / interactive steering 等）。
-- 每个子项都写**有效做法 + 缺口 / 可更好**；只夸不指出缺口，或无证据地批评，判为不合格。
-- 当 `_context.json` 的 `user_prompts` 非空时，真人动作实例必须直接引用其中真实原话（带引号 verbatim 片段），不是泛泛转述；引文必须能逐字找到，把 CLAUDE.md 规则、AI 自己的话或推测当成用户原话的，判为不合格（张冠李戴）。
-- 当 `user_prompts` 为空时，报告不得硬评真人提问手法、不得编造引文；必须写明 `user_prompts 为空 / 无真人提问可评`，并指出下一次委派应补的目标、边界、验收标准、验证方式、停手/确认点中的具体缺口。
-- `哪些做得好` 每条都绑**具体动作 + 带来的效果**，空夸（如"提问很清晰"而无具体动作/原话）判为不合格；没有真人动作时，可以评价可复用的 AI 工作方式，但必须附【可更好】。
-- `哪些用得不好 / 风险信号` 必须扫描坏味道：糊需求整包委派、盲收 AI 输出、不读 diff/不跑测试、依赖不查、补丁 loop、把架构/安全/产品取舍外包、没有沉淀、缺少验证或独立 review；有证据则必须写成 `【风险】<证据>——<为什么不好>——<下次怎么拦>`，无证据则写 `这次未发现明显的 AI 使用坏味道`。
-- `哪些用得不好 / 风险信号` 不得写成泛泛建议（如"可以更清晰"），必须是 transcript 中可定位的坏信号；如果没有坏信号，不能硬凑批评。
-- `AI 使用评分` 必须包含固定维度：目标与上下文 / 约束与验收 / 委派是否合适 / 验证与审查 / 纠错与止损 / 人类关键判断 / 沉淀复用 / 评分置信度；不得出现总分。
-- 每个评分维度必须是**自包含评分块**：`维度名：分数` 后紧跟属于它的一条或多条 `证据链 N`，一个维度写完再写下一个。若先列完所有维度分数、再把 `用户原话`/`Session 背景`/`推理` 统一堆到底部，判 FAIL。
-- 每条证据链先给可复核材料（`用户原话`/`AI 行为`/`命令结果`/`用户确认`/`事后核验`，按需挑、不必凑满）、再给单独的 `支撑结论`；同一维度多个独立支撑点要拆成多条证据链，不能糊成一句。材料绝不为凑条数编造，`用户原话` 须保留原句、不许压成 AI 转述。
-- 分数为 `0/3`、`1/3`、`2/3`、`3/3` 或 `N/A`（`N/A` 写清是「不适用」还是「证据不足」）；没有证据必须写 `N/A`，不能凭印象扣分或加分。
-- `评分置信度` 只能为低/中/高，并说明证据覆盖情况；如果 `user_prompts`、`commands`、`files_modified` 等关键证据不足，置信度不得写高。
-- 标尺真落地：`怎么提问` 要落到具体手法或缺陷类目（如"写死约束""漏验收标准导致返工"）；`怎么驾驭` 要给出依赖姿态判断（过度/不足/校准）+ 至少一处纠错恢复、选择性采纳、人工验收缺失或待确认决策点观察。但**标尺名词不得出现在正文**（出现 Prompt Pattern/Dependency Ratio 等即不合格）。
 
 ### Audience Fit
 

@@ -147,12 +147,8 @@ error message; do not retry automatically.
 `references/report-prompts.md` is the single source of truth for report
 content. Load it during step 3 and follow it exactly for:
 
-- Session Card shape: personal cards include 9 fields; manager cards omit
-  `人机协作`.
-- Personal `人机协作` must include both effective AI use and explicit
-  bad-use / risk-signal observations when evidence exists.
-- Personal `人机协作` must also include an evidence-chain-bound `AI 使用评分`
-  subitem; use dimension scores, not a total score.
+- Session Card shape: personal and manager cards share the same 8 fields.
+  AI 使用方式的分析不进日报卡片，统一归 ai-assessment 模式。
 - Daily Report shape: personal keeps the full 9 sections; manager applies the
   audience-specific removals and compression rules.
 - Evidence rules, hallucination guards, audience modes, and empty evidence

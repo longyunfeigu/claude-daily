@@ -324,7 +324,7 @@ def parse_session_file(path, token_date=None, timezone_offset=None):
                     previous_event_type = compact_events[-1]["type"] if compact_events else None
                     assistant_samples.append(compact(text, 800))
                     # Interleave assistant voice into the chronological timeline so the
-                    # 用户问→AI 答→工具 arc is reconstructable for 主要过程 / 人机协作.
+                    # 用户问→AI 答→工具 arc is reconstructable for 主要过程.
                     compact_events.append(
                         {
                             "type": "assistant",
@@ -567,7 +567,6 @@ def build_context(projects_root, date=None, session_prefixes=None, include_subag
             "差距",
             "走过的弯路",
             "证据",
-            "人机协作",
             "沉淀",
         ],
         "instructions_for_llm": {
