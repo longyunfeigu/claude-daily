@@ -35,6 +35,8 @@ ai-assessment mode 的产物 review gate。**fresh subagent** 执行：从磁盘
 
 11. **旗标与正文打架（v2 铁律 8）** —— 正文含值得负责人过问的风险，旗标却是「本期无明显风险」且无 `flag_label` 修正 → FAIL。
 
+12. **瞬间不合 CIT（v2）** —— manager 的每个瞬间必须三段齐全（情境 / 行为 / 可观察后果），缺后果段 → FAIL；瞬间必须能在对应 session 的 MAP 记录 `moment_candidates` 池里找到出处（REDUCE 凭印象另造 → FAIL）；pattern 类瞬间标「稳定模式」但只有单 session 证据 → FAIL。
+
 ## 额外结构核对
 
 - 三产物齐全；`personal` 叙事优先（每 session 有执行叙事 §B.1，不是只有结论 bullet）；`manager` 按 v2 模板含 30 秒结论 + 档位行 + 三个瞬间 + 8 维诊断段 + 处方；`meta.json` 可 `json.load`，含 `dims`(定性) + `flags` + `risk_themes` + `person.verdict_30s/level/moments/dim_diagnosis/prescription`，维度**无数字 `scores`**。
