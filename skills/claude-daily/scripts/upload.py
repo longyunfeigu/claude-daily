@@ -11,6 +11,7 @@ import socket
 import sys
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -34,6 +35,15 @@ def _payload_sha256(payload: dict) -> str:
     return hashlib.sha256(canonical).hexdigest()
 
 
+def _opener_for(url: str):
+    """Loopback endpoints must not go through HTTP(S)_PROXY (corp proxy
+    would intercept localhost and return 5xx)."""
+    host = urllib.parse.urlsplit(url).hostname or ""
+    if host in ("localhost", "127.0.0.1", "::1"):
+        return urllib.request.build_opener(urllib.request.ProxyHandler({}))
+    return urllib.request.build_opener()
+
+
 def _post(url: str, payload: dict, timeout: int = DEFAULT_TIMEOUT):
     body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
     req = urllib.request.Request(
@@ -42,7 +52,7 @@ def _post(url: str, payload: dict, timeout: int = DEFAULT_TIMEOUT):
                  "User-Agent":   USER_AGENT},
     )
     try:
-        with urllib.request.urlopen(req, timeout=timeout) as resp:
+        with _opener_for(url).open(req, timeout=timeout) as resp:
             data = resp.read().decode("utf-8") or "{}"
             return resp.status, json.loads(data)
     except urllib.error.HTTPError as e:
